@@ -30,7 +30,12 @@ export class PetsController {
     @Param("petId") petId: string,
     @Body() data: UpdatePetDto,
   ) {
-    return this.petsService.update(studentId, petId, data);
+    return {
+      ok: true,
+      statusCode: 200,
+      message: "Mascota actualizada correctamente",
+      payload: this.petsService.update(studentId, petId, data),
+    };
   }
 
   @Delete(":petId")

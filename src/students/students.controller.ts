@@ -48,6 +48,8 @@ export class StudentsController {
   public update(@Param("id") id: string, @Body() body: UpdateStudentDto) {
     return {
       ok: true,
+      statusCode: 200,
+      message: "Estudiante actualizado correctamente",
       payload: this.studentsService.update(id, body),
     };
   }
