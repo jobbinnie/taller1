@@ -1,10 +1,10 @@
-import { forwardRef, Module } from "@nestjs/common";
-import { PetsService } from "@/pets/pets.service";
-import { PetsController } from "@/pets/pets.controller";
-import { StudentsModule } from "@/students/students.module";
+import { Module, forwardRef } from '@nestjs/common';
+import { PetsController } from './pets.controller';
+import { PetsService } from './pets.service';
+import { StudentsModule } from '../students/students.module';
 
 @Module({
-  imports: [forwardRef(() => StudentsModule)],
+  imports: [forwardRef(() => StudentsModule)], 
   controllers: [PetsController],
   providers: [PetsService],
   exports: [PetsService],
