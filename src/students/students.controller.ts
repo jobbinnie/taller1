@@ -48,8 +48,6 @@ export class StudentsController {
   public update(@Param("id") id: string, @Body() body: UpdateStudentDto) {
     return {
       ok: true,
-      statusCode: 200,
-      message: "Estudiante actualizado correctamente",
       payload: this.studentsService.update(id, body),
     };
   }
@@ -60,6 +58,8 @@ export class StudentsController {
     this.petsService.deleteAllForStudent(id);
     return {
       ok: true,
+      code: 200,
+      message: "Estudiante eliminado correctamente",
       payload: deleted,
     };
   }
