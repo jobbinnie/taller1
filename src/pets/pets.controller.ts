@@ -12,7 +12,7 @@ import { PetsService } from "@/pets/pets.service";
 import { CreatePetDto, UpdatePetDto } from "@/pets/pets.dtos";
 import { ApiResponse } from "@/shared/api-response.dto";
 
-@Controller("api/students/:studentId/pets")
+@Controller("api/pets")
 export class PetsController {
   constructor(private readonly petsService: PetsService) {}
 

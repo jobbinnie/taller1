@@ -1,5 +1,10 @@
 import { randomUUID } from "node:crypto";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 
 import type { Pet } from "./pets.entity";
 import { CreatePetDto, UpdatePetDto } from "@/pets/pets.dtos";
@@ -10,17 +15,36 @@ import { StudentsService } from "@/students/students.service";
 export class PetsService {
   private readonly store = new InMemoryStore<Pet>();
 
-  constructor(private readonly studentsService: StudentsService) {}
+  constructor(
+    @Inject(forwardRef(() => StudentsService))
+    private readonly studentsService: StudentsService,
+  ) {}
 
-  public findAllForStudent(studentId: string): Pet[] {
-    this.assertStudentExists(studentId);
+  public findAll(): Pet[] {
     return this.store
-      .findBy((pet) => pet.studentId === studentId)
+      .findAll()
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
-  public create(studentId: string, data: CreatePetDto): Pet {
-    this.assertStudentExists(studentId);
+  public findById(id: string): Pet {
+    const pet = this.store.get(id);
+
+    if (!pet) {
+      throw new NotFoundException("Mascota no encontrada");
+    }
+
+    return pet;
+  }
+
+  public findByStudentId(studentId: string): Pet[] {
+    return this.store.findAll().filter((pet) => pet.studentId === studentId);
+  }
+
+  public create(data: CreatePetDto): Pet {
+    const studentId = (data as CreatePetDto & { studentId: string }).studentId;
+
+    // lanza NotFoundException si el estudiante no existe
+    this.studentsService.findById(studentId);
 
     const now = new Date();
     const pet: Pet = {
@@ -37,14 +61,20 @@ export class PetsService {
     return pet;
   }
 
-  public update(studentId: string, petId: string, data: UpdatePetDto): Pet {
-    const existing = this.findOwned(studentId, petId);
+  public update(id: string, data: UpdatePetDto): Pet {
+    const existing = this.findById(id);
+    const studentId = (data as UpdatePetDto & { studentId?: string }).studentId;
+
+    if (studentId && studentId !== existing.studentId) {
+      this.studentsService.findById(studentId);
+    }
 
     const updated: Pet = {
       ...existing,
       name: data.name ?? existing.name,
       species: data.species ?? existing.species,
       age: data.age ?? existing.age,
+      studentId: studentId ?? existing.studentId,
       updatedAt: new Date(),
     };
 
@@ -52,29 +82,13 @@ export class PetsService {
     return updated;
   }
 
-  public delete(studentId: string, petId: string): Pet {
-    const existing = this.findOwned(studentId, petId);
-    this.store.delete(petId);
+  public delete(id: string): Pet {
+    const existing = this.findById(id);
+    this.store.delete(id);
     return existing;
   }
 
   public deleteAllForStudent(studentId: string): void {
-    this.store.deleteBy((pet) => pet.studentId === studentId);
-  }
-
-  private findOwned(studentId: string, petId: string): Pet {
-    this.assertStudentExists(studentId);
-
-    const pet = this.store.get(petId);
-
-    if (!pet || pet.studentId !== studentId) {
-      throw new NotFoundException("Mascota no encontrada");
-    }
-
-    return pet;
-  }
-
-  private assertStudentExists(studentId: string) {
-    this.studentsService.findById(studentId);
+    this.findByStudentId(studentId).forEach((pet) => this.store.delete(pet.id));
   }
 }
