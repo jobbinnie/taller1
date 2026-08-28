@@ -1,4 +1,5 @@
 import { AppModule } from "@/app.module";
+import { HttpExceptionFilter } from "@/shared/http-exception.filter";
 
 import { ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
@@ -10,6 +11,9 @@ async function bootstrap() {
   app.enableCors({
     origin: "*",
   });
+
+  // Registramos el filtro global de errores
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   app.useGlobalPipes(
     new ValidationPipe({
