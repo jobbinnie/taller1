@@ -10,41 +10,63 @@ import {
 
 import { PetsService } from "@/pets/pets.service";
 import { CreatePetDto, UpdatePetDto } from "@/pets/pets.dtos";
-import { successResponse } from "@/shared/api-response.dtos";
+import { ApiResponse } from "@/shared/api-response.dto";
 
 @Controller("api/pets")
 export class PetsController {
   constructor(private readonly petsService: PetsService) {}
 
   @Get()
-  public findAll() {
-    const pets = this.petsService.findAll();
-    return successResponse(pets, "Mascotas obtenidas correctamente", 200, {
-      total: pets.length,
-    });
-  }
-
-  @Get(":id")
-  public findById(@Param("id") id: string) {
-    const pet = this.petsService.findById(id);
-    return successResponse(pet, "Mascota encontrada");
+  public findAll(@Param("studentId") studentId: string) {
+    const pets = this.petsService.findAllForStudent(studentId);
+    return new ApiResponse(
+      true,
+      200,
+      "Lista de mascotas obtenida exitosamente",
+      pets,
+    );
   }
 
   @Post()
-  public create(@Body() body: CreatePetDto) {
-    const pet = this.petsService.create(body);
-    return successResponse(pet, "Mascota creada correctamente", 201);
+  public create(
+    @Param("studentId") studentId: string,
+    @Body() body: CreatePetDto,
+  ) {
+    const created = this.petsService.create(studentId, body);
+    return new ApiResponse(
+      true,
+      201,
+      "Mascota creada exitosamente",
+      created,
+    );
   }
 
-  @Patch(":id")
-  public update(@Param("id") id: string, @Body() body: UpdatePetDto) {
-    const pet = this.petsService.update(id, body);
-    return successResponse(pet, "Mascota actualizada correctamente");
+  @Patch(":petId")
+  public update(
+    @Param("studentId") studentId: string,
+    @Param("petId") petId: string,
+    @Body() body: UpdatePetDto,
+  ) {
+    const updated = this.petsService.update(studentId, petId, body);
+    return new ApiResponse(
+      true,
+      200,
+      "Mascota actualizada exitosamente",
+      updated,
+    );
   }
 
-  @Delete(":id")
-  public delete(@Param("id") id: string) {
-    const deleted = this.petsService.delete(id);
-    return successResponse(deleted, "Mascota eliminada correctamente");
+  @Delete(":petId")
+  public delete(
+    @Param("studentId") studentId: string,
+    @Param("petId") petId: string,
+  ) {
+    const deleted = this.petsService.delete(studentId, petId);
+    return new ApiResponse(
+      true,
+      200,
+      "Mascota eliminada exitosamente",
+      deleted,
+    );
   }
 }
