@@ -1,45 +1,62 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from "@nestjs/common";
-import { PetsService } from "./pets.service";
-import { CreatePetDto, UpdatePetDto } from "./pets.dtos";
 
-@Controller("students/:studentId/pets")
+import { PetsService } from "@/pets/pets.service";
+import { CreatePetDto, UpdatePetDto } from "@/pets/pets.dtos";
+
+@Controller("api/students/:studentId/pets")
 export class PetsController {
   constructor(private readonly petsService: PetsService) {}
 
-  @Post()
-  create(@Param("studentId") studentId: string, @Body() data: CreatePetDto) {
-    return this.petsService.create(studentId, data);
-  }
-
   @Get()
-  findAllForStudent(@Param("studentId") studentId: string) {
-    return this.petsService.findAllForStudent(studentId);
+  public findAll(@Param("studentId") studentId: string) {
+    const pets = this.petsService.findAllForStudent(studentId);
+    return {
+      total: pets.length,
+      items: pets,
+    };
   }
 
-  @Patch(":petId")
-  update(
+  @Post()
+  public create(
     @Param("studentId") studentId: string,
-    @Param("petId") petId: string,
-    @Body() data: UpdatePetDto,
+    @Body() body: CreatePetDto,
   ) {
     return {
       ok: true,
-      statusCode: 200,
-      message: "Mascota actualizada correctamente",
-      payload: this.petsService.update(studentId, petId, data),
+      payload: this.petsService.create(studentId, body),
+    };
+  }
+
+  @Patch(":petId")
+  public update(
+    @Param("studentId") studentId: string,
+    @Param("petId") petId: string,
+    @Body() body: UpdatePetDto,
+  ) {
+    return {
+      ok: true,
+      payload: this.petsService.update(studentId, petId, body),
     };
   }
 
   @Delete(":petId")
-  remove(@Param("studentId") studentId: string, @Param("petId") petId: string) {
-    return this.petsService.delete(studentId, petId);
+  public delete(
+    @Param("studentId") studentId: string,
+    @Param("petId") petId: string,
+  ) {
+    return {
+      ok: true,
+      statuscode: 200,
+      message: "Macota eliminada exitosamente",
+      payload: this.petsService.delete(studentId, petId),
+    };
   }
 }
