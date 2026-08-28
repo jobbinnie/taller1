@@ -4,7 +4,7 @@ import { PetsService } from './pets.service';
 import { StudentsModule } from '../students/students.module';
 
 @Module({
-  imports: [forwardRef(() => StudentsModule)], 
+  imports: [forwardRef(() => StudentsModule)],
   controllers: [PetsController],
   providers: [PetsService],
   exports: [PetsService],

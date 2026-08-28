@@ -1,40 +1,50 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from "@nestjs/common";
-import { PetsService } from "./pets.service";
-import { CreatePetDto, UpdatePetDto } from "./pets.dtos";
 
-@Controller("students/:studentId/pets")
+import { PetsService } from "@/pets/pets.service";
+import { CreatePetDto, UpdatePetDto } from "@/pets/pets.dtos";
+import { successResponse } from "@/shared/api-response.dtos";
+
+@Controller("api/pets")
 export class PetsController {
   constructor(private readonly petsService: PetsService) {}
 
-  @Post()
-  create(@Param("studentId") studentId: string, @Body() data: CreatePetDto) {
-    return this.petsService.create(studentId, data);
-  }
-
   @Get()
-  findAllForStudent(@Param("studentId") studentId: string) {
-    return this.petsService.findAllForStudent(studentId);
+  public findAll() {
+    const pets = this.petsService.findAll();
+    return successResponse(pets, "Mascotas obtenidas correctamente", 200, {
+      total: pets.length,
+    });
   }
 
-  @Patch(":petId")
-  update(
-    @Param("studentId") studentId: string,
-    @Param("petId") petId: string,
-    @Body() data: UpdatePetDto,
-  ) {
-    return this.petsService.update(studentId, petId, data);
+  @Get(":id")
+  public findById(@Param("id") id: string) {
+    const pet = this.petsService.findById(id);
+    return successResponse(pet, "Mascota encontrada");
   }
 
-  @Delete(":petId")
-  remove(@Param("studentId") studentId: string, @Param("petId") petId: string) {
-    return this.petsService.delete(studentId, petId);
+  @Post()
+  public create(@Body() body: CreatePetDto) {
+    const pet = this.petsService.create(body);
+    return successResponse(pet, "Mascota creada correctamente", 201);
+  }
+
+  @Patch(":id")
+  public update(@Param("id") id: string, @Body() body: UpdatePetDto) {
+    const pet = this.petsService.update(id, body);
+    return successResponse(pet, "Mascota actualizada correctamente");
+  }
+
+  @Delete(":id")
+  public delete(@Param("id") id: string) {
+    const deleted = this.petsService.delete(id);
+    return successResponse(deleted, "Mascota eliminada correctamente");
   }
 }
